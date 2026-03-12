@@ -73,11 +73,11 @@ public class DomainModel {
         }
     }
 
-    public static class Object {
+    public static class Building {
         private String name;
         private String location;
 
-        public Object(String name, String location) {
+        public Building(String name, String location) {
             this.name = name;
             this.location = location;
         }
@@ -99,15 +99,53 @@ public class DomainModel {
         }
     }
 
+    public static class Object {
+        private String name;
+        private String location;
+        private String type;  // Type could be "pomost", "stage", etc.
+
+        public Object(String name, String location, String type) {
+            this.name = name;
+            this.location = location;
+            this.type = type;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getLocation() {
+            return location;
+        }
+
+        public void setLocation(String location) {
+            this.location = location;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+    }
+
     public static class Event {
-        private Person speaker;
+        private Person speaker;  // Now, "Артур" is just an instance of "Person"
         private Crowd crowd;
         private Object stage;
+        private Building building;
 
-        public Event(Person speaker, Crowd crowd, Object stage) {
+        public Event(Person speaker, Crowd crowd, Object stage, Building building) {
             this.speaker = speaker;
             this.crowd = crowd;
             this.stage = stage;
+            this.building = building;
         }
 
         public Person getSpeaker() {
@@ -132,6 +170,14 @@ public class DomainModel {
 
         public void setStage(Object stage) {
             this.stage = stage;
+        }
+
+        public Building getBuilding() {
+            return building;
+        }
+
+        public void setBuilding(Building building) {
+            this.building = building;
         }
     }
 }

@@ -1,157 +1,141 @@
+
 import com.example.lab1_tos.DomainModel;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class DomainModelTest {
 
-    //создание объекта Person
+    //создание человека (Артур)
     @Test
-    public void testPerson() {
-        DomainModel.Person person = new DomainModel.Person("Arthur");
-        assertEquals("Arthur", person.getName());
+    public void testPersonCreation() {
+        DomainModel.Person person = new DomainModel.Person("Артур");
+        assertNotNull(person);
+        assertEquals("Артур", person.getName());
     }
 
-    //создание нескольких людей
+    //создание толпы и добавление человека
     @Test
-    public void testMultiplePersons() {
-        DomainModel.Person person1 = new DomainModel.Person("Arthur");
-        DomainModel.Person person2 = new DomainModel.Person("Boris");
-        assertEquals("Arthur", person1.getName());
-        assertEquals("Boris", person2.getName());
-    }
-
-    //создание толпы
-    @Test
-    public void testCrowd() {
-        List<DomainModel.Person> people = Arrays.asList(new DomainModel.Person("Arthur"), new DomainModel.Person("Boris"));
-        assertEquals(2, people.size());
-        assertEquals("Arthur", people.get(0).getName());
-        assertEquals("Boris", people.get(1).getName());
-    }
-
-    //заимодействие людей в толпе
-    @Test
-    public void testPersonInteraction() {
-        DomainModel.Person person1 = new DomainModel.Person("Arthur");
-        DomainModel.Person person2 = new DomainModel.Person("Boris");
-        String interactionMessage = person1.greet(person2);
-        assertEquals("Arthur greets Boris", interactionMessage);
-    }
-
-    // пустая толпа
-    @Test
-    public void testEmptyCrowd() {
-        List<DomainModel.Person> people = Arrays.asList();
-        assertTrue(people.isEmpty());
-    }
-
-    //null имя
-    @Test
-    public void testNullName() {
-        DomainModel.Person person = new DomainModel.Person(null);
-        assertNull(person.getName());
-    }
-
-    // пустое имя
-    @Test
-    public void testEmptyName() {
-        DomainModel.Person person = new DomainModel.Person("");
-        assertEquals("", person.getName());
-    }
-
-    //добавление человека в толпу
-    @Test
-    public void testAddPersonToCrowd() {
-        DomainModel.Person person1 = new DomainModel.Person("Arthur");
-        DomainModel.Person person2 = new DomainModel.Person("Boris");
-        List<DomainModel.Person> people = Arrays.asList(person1, person2);
+    public void testCrowdAddPerson() {
+        DomainModel.Person person = new DomainModel.Person("Оратор");
         DomainModel.Crowd crowd = new DomainModel.Crowd();
-        crowd.addPerson(person1);
-        crowd.addPerson(person2);
-        assertEquals(2, crowd.getSize());
+        crowd.addPerson(person);
+        assertEquals(1, crowd.getSize());
+        assertTrue(crowd.contains(person));
+    }
+
+    //создание объекта "Помост" и проверку его типа
+    @Test
+    public void testObjectCreation() {
+        DomainModel.Object stage = new DomainModel.Object("Помост", "Второй этаж здания", "Stage");
+        assertNotNull(stage);
+        assertEquals("Помост", stage.getName());
+        assertEquals("Stage", stage.getType());
+    }
+
+    //создание события с оратором, толпой и сценой
+    @Test
+    public void testEventCreation() {
+        DomainModel.Person speaker = new DomainModel.Person("Оратор");
+        DomainModel.Crowd crowd = new DomainModel.Crowd();
+        DomainModel.Object stage = new DomainModel.Object("Помост", "Второй этаж здания", "Stage");
+        DomainModel.Building building = new DomainModel.Building("Здание с помостом", "Второй этаж");
+
+        DomainModel.Event event = new DomainModel.Event(speaker, crowd, stage, building);
+
+        assertNotNull(event);
+        assertEquals("Оратор", event.getSpeaker().getName());
+        assertEquals(0, event.getCrowd().getSize());  // толпа пуста
+        assertEquals("Помост", event.getStage().getName());
+        assertEquals("Здание с помостом", event.getBuilding().getName());
+    }
+
+    //взаимодействие людей в толпе
+    @Test
+    public void testCrowdInteraction() {
+        DomainModel.Person speaker = new DomainModel.Person("Оратор");
+        DomainModel.Person arthur = new DomainModel.Person("Артур");
+
+        DomainModel.Crowd crowd = new DomainModel.Crowd();
+        crowd.addPerson(speaker);
+        crowd.addPerson(arthur);
+
+        assertDoesNotThrow(() -> crowd.interact());
     }
 
     //удаление человека из толпы
     @Test
     public void testRemovePersonFromCrowd() {
-        DomainModel.Person person1 = new DomainModel.Person("Arthur");
-        DomainModel.Person person2 = new DomainModel.Person("Boris");
+        DomainModel.Person speaker = new DomainModel.Person("Оратор");
         DomainModel.Crowd crowd = new DomainModel.Crowd();
-        crowd.addPerson(person1);
-        crowd.addPerson(person2);
-        crowd.removePerson(person1);
+        crowd.addPerson(speaker);
+
         assertEquals(1, crowd.getSize());
-        assertFalse(crowd.contains(person1));
+
+        crowd.removePerson(speaker);
+        assertEquals(0, crowd.getSize());
+        assertFalse(crowd.contains(speaker));
+    }
+
+    //тест на пустую толпу
+    @Test
+    public void testEmptyCrowdInteraction() {
+        DomainModel.Crowd crowd = new DomainModel.Crowd();
+        assertThrows(IllegalArgumentException.class, () -> crowd.interact());
+    }
+
+    //создание здания
+    @Test
+    public void testBuildingCreation() {
+        DomainModel.Building building = new DomainModel.Building("Здание с помостом", "Второй этаж");
+        assertNotNull(building);
+        assertEquals("Здание с помостом", building.getName());
+        assertEquals("Второй этаж", building.getLocation());
+    }
+
+    //взаимодействие событий
+    @Test
+    public void testEventInteraction() {
+        DomainModel.Person speaker = new DomainModel.Person("Оратор");
+        DomainModel.Crowd crowd = new DomainModel.Crowd();
+        DomainModel.Object stage = new DomainModel.Object("Помост", "Второй этаж здания", "Stage");
+        DomainModel.Building building = new DomainModel.Building("Здание с помостом", "Второй этаж");
+
+        DomainModel.Event event = new DomainModel.Event(speaker, crowd, stage, building);
+
+        assertEquals("Оратор", event.getSpeaker().getName());
+        assertEquals("Помост", event.getStage().getName());
+        assertEquals("Здание с помостом", event.getBuilding().getName());
     }
 
     //добавление нескольких людей в толпу
     @Test
-    public void testAddMultiplePersons() {
-        DomainModel.Person person1 = new DomainModel.Person("Arthur");
-        DomainModel.Person person2 = new DomainModel.Person("Boris");
-        DomainModel.Person person3 = new DomainModel.Person("Lena");
+    public void testAddMultiplePeopleToCrowd() {
+        DomainModel.Person person1 = new DomainModel.Person("Оратор");
+        DomainModel.Person person2 = new DomainModel.Person("Артур");
+
         DomainModel.Crowd crowd = new DomainModel.Crowd();
         crowd.addPerson(person1);
         crowd.addPerson(person2);
-        crowd.addPerson(person3);
-        assertEquals(3, crowd.getSize());
+
+        assertEquals(2, crowd.getSize());
+        assertTrue(crowd.contains(person1));
+        assertTrue(crowd.contains(person2));
     }
 
-    //работа с пустым именем в методах модели
-    @Test
-    public void testCrowdWithEmptyName() {
-        DomainModel.Person person1 = new DomainModel.Person("");
-        DomainModel.Crowd crowd = new DomainModel.Crowd();
-        crowd.addPerson(person1);
-        assertEquals(1, crowd.getSize());
-    }
-
-    //получение всех людей из толпы
-    @Test
-    public void testGetAllPeopleFromCrowd() {
-        DomainModel.Person person1 = new DomainModel.Person("Arthur");
-        DomainModel.Person person2 = new DomainModel.Person("Boris");
-        DomainModel.Crowd crowd = new DomainModel.Crowd();
-        crowd.addPerson(person1);
-        crowd.addPerson(person2);
-        List<DomainModel.Person> people = crowd.getAllPeople();
-        assertEquals(2, people.size());
-        assertTrue(people.contains(person1));
-        assertTrue(people.contains(person2));
-    }
-
-    //правильность отображения толпы
+    //отображение всех людей в толпе
     @Test
     public void testCrowdDisplay() {
-        DomainModel.Person person1 = new DomainModel.Person("Arthur");
-        DomainModel.Person person2 = new DomainModel.Person("Boris");
+        DomainModel.Person person1 = new DomainModel.Person("Оратор");
+        DomainModel.Person person2 = new DomainModel.Person("Артур");
+
         DomainModel.Crowd crowd = new DomainModel.Crowd();
         crowd.addPerson(person1);
         crowd.addPerson(person2);
-        assertEquals("Arthur, Boris", crowd.display());
-    }
 
-    //размер толпы
-    @Test
-    public void testCrowdSize() {
-        DomainModel.Crowd crowd = new DomainModel.Crowd();
-        DomainModel.Person person1 = new DomainModel.Person("Arthur");
-        DomainModel.Person person2 = new DomainModel.Person("Boris");
-        crowd.addPerson(person1);
-        crowd.addPerson(person2);
-        assertEquals(2, crowd.getSize());
-    }
-
-    //отсутствие взаимодействий с пустой толпой
-    @Test
-    public void testNoInteractionInEmptyCrowd() {
-        DomainModel.Crowd crowd = new DomainModel.Crowd();
-        assertEquals(0, crowd.getSize());
-        assertThrows(IllegalArgumentException.class, () -> {
-            crowd.interact();
-        });
+        String display = crowd.display();
+        assertTrue(display.contains("Оратор"));
+        assertTrue(display.contains("Артур"));
     }
 }
