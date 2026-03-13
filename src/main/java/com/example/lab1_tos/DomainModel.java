@@ -7,9 +7,21 @@ public class DomainModel {
 
     public static class Person {
         private String name;
+        private String mood;
+        private String info;
 
         public Person(String name) {
             this.name = name;
+            this.mood = "neutral";
+            this.info = "";
+        }
+
+        public String getInfo() {
+            return info;
+        }
+
+        public void setInfo(String info) {
+            this.info = info;
         }
 
         public String getName() {
@@ -20,20 +32,50 @@ public class DomainModel {
             this.name = name;
         }
 
+        public String getMood() {
+            return mood;
+        }
+
+        public void setMood(String mood) {
+            this.mood = mood;
+        }
+
+        public void shareInfo(Person other) {
+            other.setInfo(this.info);
+            System.out.println(this.name + " shares information with " + other.getName() + ": " + this.info);
+        }
+
+        public void reactToSpeech(String speechType) {
+            if ("inspirational".equals(speechType)) {
+                this.mood = "happy";
+            } else if ("angry".equals(speechType)) {
+                this.mood = "angry";
+            } else {
+                this.mood = "neutral";
+            }
+        }
+
         public String greet(Person other) {
-            return this.name + " greets " + other.getName();
+            this.shareInfo(other);
+            return this.name + " greets " + other.getName() + " with a " + this.mood + " mood.";
         }
     }
 
+
     public static class Crowd {
         private List<Person> people;
+        private static final int MAX_CAPACITY = 10;
 
         public Crowd() {
             this.people = new ArrayList<>();
         }
 
         public void addPerson(Person person) {
-            people.add(person);
+            if (people.size() < MAX_CAPACITY) {
+                people.add(person);
+            } else {
+                System.out.println("Толпа достигла максимальной вместимости, не может добавить больше людей.");
+            }
         }
 
         public void removePerson(Person person) {
@@ -71,6 +113,12 @@ public class DomainModel {
             Person lastPerson = people.get(people.size() - 1);
             System.out.println(firstPerson.getName() + " interacts with " + lastPerson.getName());
         }
+
+        public void changeMoodBasedOnSpeech(String speechType) {
+            for (Person person : people) {
+                person.reactToSpeech(speechType);
+            }
+        }
     }
 
     public static class Building {
@@ -102,7 +150,7 @@ public class DomainModel {
     public static class Object {
         private String name;
         private String location;
-        private String type;  // Type could be "pomost", "stage", etc.
+        private String type;
 
         public Object(String name, String location, String type) {
             this.name = name;
@@ -112,10 +160,6 @@ public class DomainModel {
 
         public String getName() {
             return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
         }
 
         public String getLocation() {
@@ -136,7 +180,7 @@ public class DomainModel {
     }
 
     public static class Event {
-        private Person speaker;  // Now, "Артур" is just an instance of "Person"
+        private Person speaker;
         private Crowd crowd;
         private Object stage;
         private Building building;
@@ -148,13 +192,15 @@ public class DomainModel {
             this.building = building;
         }
 
+        public void startSpeech(String speechType) {
+            System.out.println(speaker.getName() + " starts an " + speechType + " speech.");
+            crowd.changeMoodBasedOnSpeech(speechType); // меняем настроение толпы в зависимости от речи
+        }
+
         public Person getSpeaker() {
             return speaker;
         }
 
-        public void setSpeaker(Person speaker) {
-            this.speaker = speaker;
-        }
 
         public Crowd getCrowd() {
             return crowd;

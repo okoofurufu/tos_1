@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class DomainModelTest {
 
-    // создание человека (Артур)
+    // создание человека
     @Test
     public void testPersonCreation() {
         DomainModel.Person person = new DomainModel.Person("Артур");
@@ -348,6 +348,63 @@ public class DomainModelTest {
         DomainModel.Person person2 = new DomainModel.Person("Артур");
 
         String greeting = person1.greet(person2);
-        assertEquals("Оратор greets Артур", greeting);
+        assertEquals("Оратор greets Артур with a neutral mood.", greeting);
+    }
+
+    // тест на изменение настроения после речи
+    @Test
+    public void testPersonMoodChangeAfterSpeech() {
+        DomainModel.Person speaker = new DomainModel.Person("Оратор");
+        DomainModel.Person person = new DomainModel.Person("Артур");
+        assertEquals("neutral", speaker.getMood());
+        speaker.reactToSpeech("inspirational");
+        assertEquals("happy", speaker.getMood());
+        speaker.reactToSpeech("angry");
+        assertEquals("angry", speaker.getMood());
+    }
+
+    // тест на информацию, которую человек передает
+    @Test
+    public void testShareInfoBetweenPeople() {
+        DomainModel.Person speaker = new DomainModel.Person("Оратор");
+        speaker.setInfo("Новая информация");
+
+        DomainModel.Person person = new DomainModel.Person("Артур");
+        assertEquals("", person.getInfo());
+        speaker.shareInfo(person);
+
+        assertEquals("Новая информация", person.getInfo());
+    }
+
+    // тест на максимальную вместимость толпы
+    @Test
+    public void testCrowdMaxCapacity() {
+        DomainModel.Crowd crowd = new DomainModel.Crowd();
+        for (int i = 0; i < 10; i++) {
+            crowd.addPerson(new DomainModel.Person("Человек " + i));
+        }
+
+        assertEquals(10, crowd.getSize());
+
+        DomainModel.Person newPerson = new DomainModel.Person("Новый человек");
+        crowd.addPerson(newPerson);
+
+        assertEquals(10, crowd.getSize());
+    }
+
+    // тест на добавление информации и взаимодействие в толпе
+    @Test
+    public void testCrowdInteractionWithInfoSharing() {
+        DomainModel.Person speaker = new DomainModel.Person("Оратор");
+        DomainModel.Person arthur = new DomainModel.Person("Артур");
+
+        speaker.setInfo("Информация от оратора");
+        speaker.shareInfo(arthur);
+
+        DomainModel.Crowd crowd = new DomainModel.Crowd();
+        crowd.addPerson(speaker);
+        crowd.addPerson(arthur);
+
+        assertEquals("Информация от оратора", arthur.getInfo());
     }
 }

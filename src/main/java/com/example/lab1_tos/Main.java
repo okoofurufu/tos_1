@@ -17,9 +17,12 @@ public class Main {
         ShellSort.shellSort(array);
         System.out.println("После сортировки: " + java.util.Arrays.toString(array));
 
-        // 3. Запуск доменной модели
+        // 3. Запуск доменной модели с информацией и настроениями
         DomainModel.Person speaker = new DomainModel.Person("Оратор");
+        speaker.setInfo("Сегодня буду говорить о важности единства.");
+
         DomainModel.Person arthur = new DomainModel.Person("Артур");
+        arthur.setInfo("Жду вдохновляющую речь!");
 
         DomainModel.Crowd crowd = new DomainModel.Crowd();
         crowd.addPerson(speaker);
@@ -30,7 +33,20 @@ public class Main {
         DomainModel.Building building = new DomainModel.Building("Здание с помостом", "Второй этаж");
 
         DomainModel.Event event = new DomainModel.Event(speaker, crowd, stage, building);
+
         System.out.println("Событие произошло с оратором " + event.getSpeaker().getName() +
-                ", толпой из " + event.getCrowd().getSize() + " человек, на " + event.getStage().getName() + " в " + event.getBuilding().getName());
+                ", толпой из " + event.getCrowd().getSize() + " человек, на " + event.getStage().getName() +
+                " в " + event.getBuilding().getName());
+
+        // 4. Оратор делится информацией с толпой
+        speaker.shareInfo(arthur);  // Оратор делится информацией с Артуром
+        arthur.shareInfo(speaker);  // Артур делится информацией с Оратором
+
+        // 5. Оратор начинает речь и меняет настроение толпы
+        event.startSpeech("inspirational");
+
+        // 6. Проверка состояния настроений после речи
+        System.out.println(speaker.getName() + " настроен на: " + speaker.getMood());
+        System.out.println(arthur.getName() + " настроен на: " + arthur.getMood());
     }
 }
