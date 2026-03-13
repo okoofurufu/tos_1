@@ -1,0 +1,10 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+lab1_tos,com.example.lab1_tos,DomainModel.Building,8,15,0,0,4,6,2,3,2,3
+lab1_tos,com.example.lab1_tos,ShellSort,3,55,0,8,1,8,1,5,1,1
+lab1_tos,com.example.lab1_tos,CosineFunction,3,57,1,7,1,12,2,5,1,2
+lab1_tos,com.example.lab1_tos,DomainModel.Person,10,9,0,0,3,4,2,2,2,2
+lab1_tos,com.example.lab1_tos,DomainModel,3,0,0,0,1,0,1,0,1,0
+lab1_tos,com.example.lab1_tos,DomainModel.Crowd,3,93,0,6,1,22,1,10,1,7
+lab1_tos,com.example.lab1_tos,Main,109,0,0,0,19,0,2,0,2,0
+lab1_tos,com.example.lab1_tos,DomainModel.Object,15,18,0,0,7,7,4,3,4,3
+lab1_tos,com.example.lab1_tos,DomainModel.Event,16,27,0,0,8,10,4,5,4,5

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Main.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">lab1_tos</a> &gt; <a href="index.source.html" class="el_package">com.example.lab1_tos</a> &gt; <span class="el_source">Main.java</span></div><h1>Main.java</h1><pre class="source lang-java linenums">package com.example.lab1_tos;
+
+import java.util.ArrayList;
+import java.util.List;
+
+<span class="nc" id="L6">public class Main {</span>
+
+    public static void main(String[] args) {
+        // 1. Запуск разложения cos(x)
+<span class="nc" id="L10">        double x = Math.PI / 3;</span>
+<span class="nc" id="L11">        double result = CosineFunction.cosSeries(x);</span>
+<span class="nc" id="L12">        System.out.println(&quot;cos(&quot; + x + &quot;) = &quot; + result);</span>
+
+        // 2. Запуск сортировки Шелла
+<span class="nc" id="L15">        int[] array = {5, 2, 9, 1, 5, 6};</span>
+<span class="nc" id="L16">        System.out.println(&quot;До сортировки: &quot; + java.util.Arrays.toString(array));</span>
+<span class="nc" id="L17">        ShellSort.shellSort(array);</span>
+<span class="nc" id="L18">        System.out.println(&quot;После сортировки: &quot; + java.util.Arrays.toString(array));</span>
+
+        // 3. Запуск доменной модели
+<span class="nc" id="L21">        DomainModel.Person speaker = new DomainModel.Person(&quot;Оратор&quot;);</span>
+<span class="nc" id="L22">        DomainModel.Person arthur = new DomainModel.Person(&quot;Артур&quot;);</span>
+
+<span class="nc" id="L24">        DomainModel.Crowd crowd = new DomainModel.Crowd();</span>
+<span class="nc" id="L25">        crowd.addPerson(speaker);</span>
+<span class="nc" id="L26">        crowd.addPerson(arthur);</span>
+
+<span class="nc" id="L28">        DomainModel.Object stage = new DomainModel.Object(&quot;Помост&quot;, &quot;Второй этаж здания&quot;, &quot;Stage&quot;);</span>
+
+<span class="nc" id="L30">        DomainModel.Building building = new DomainModel.Building(&quot;Здание с помостом&quot;, &quot;Второй этаж&quot;);</span>
+
+<span class="nc" id="L32">        DomainModel.Event event = new DomainModel.Event(speaker, crowd, stage, building);</span>
+<span class="nc" id="L33">        System.out.println(&quot;Событие произошло с оратором &quot; + event.getSpeaker().getName() +</span>
+<span class="nc" id="L34">                &quot;, толпой из &quot; + event.getCrowd().getSize() + &quot; человек, на &quot; + event.getStage().getName() + &quot; в &quot; + event.getBuilding().getName());</span>
+<span class="nc" id="L35">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>
