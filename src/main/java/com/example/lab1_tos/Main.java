@@ -1,52 +1,53 @@
 package com.example.lab1_tos;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Main {
 
     public static void main(String[] args) {
-        // 1. Запуск разложения cos(x)
         double x = Math.PI / 3;
         double result = CosineFunction.cosSeries(x);
         System.out.println("cos(" + x + ") = " + result);
 
-        // 2. Запуск сортировки Шелла
         int[] array = {5, 2, 9, 1, 5, 6};
         System.out.println("До сортировки: " + java.util.Arrays.toString(array));
         ShellSort.shellSort(array);
         System.out.println("После сортировки: " + java.util.Arrays.toString(array));
 
-        // 3. Запуск доменной модели с информацией и настроениями
+        DomainModel.Building building = new DomainModel.Building(
+                "Здание с помостом",
+                "Второй этаж",
+                150
+        );
+
         DomainModel.Person speaker = new DomainModel.Person("Оратор");
         speaker.setInfo("Сегодня буду говорить о важности единства.");
 
         DomainModel.Person arthur = new DomainModel.Person("Артур");
-        arthur.setInfo("Жду вдохновляющую речь!");
+        DomainModel.Person alex = new DomainModel.Person("Алекс");
 
-        DomainModel.Crowd crowd = new DomainModel.Crowd();
+        DomainModel.Crowd crowd = new DomainModel.Crowd(building);
         crowd.addPerson(speaker);
         crowd.addPerson(arthur);
+        crowd.addPerson(alex);
 
-        DomainModel.Object stage = new DomainModel.Object("Помост", "Второй этаж здания", "Stage");
-
-        DomainModel.Building building = new DomainModel.Building("Здание с помостом", "Второй этаж");
+        String stage = "Помост";
 
         DomainModel.Event event = new DomainModel.Event(speaker, crowd, stage, building);
 
-        System.out.println("Событие произошло с оратором " + event.getSpeaker().getName() +
-                ", толпой из " + event.getCrowd().getSize() + " человек, на " + event.getStage().getName() +
-                " в " + event.getBuilding().getName());
+        System.out.println("Событие произошло в " + event.getBuilding().getName());
+        System.out.println("Количество людей в толпе: " + event.getCrowd().getSize());
+        System.out.println("Максимальная вместимость: " + event.getCrowd().getMaxCapacity());
 
-        // 4. Оратор делится информацией с толпой
-        speaker.shareInfo(arthur);  // Оратор делится информацией с Артуром
-        arthur.shareInfo(speaker);  // Артур делится информацией с Оратором
-
-        // 5. Оратор начинает речь и меняет настроение толпы
         event.startSpeech("inspirational");
 
-        // 6. Проверка состояния настроений после речи
-        System.out.println(speaker.getName() + " настроен на: " + speaker.getMood());
-        System.out.println(arthur.getName() + " настроен на: " + arthur.getMood());
+        System.out.println(speaker.getName() + ": " + speaker.getMood());
+        System.out.println(arthur.getName() + ": " + arthur.getMood());
+        System.out.println(alex.getName() + ": " + alex.getMood());
+
+        crowd.interact();
+
+        System.out.println("После взаимодействия:");
+        System.out.println(speaker.getName() + ": " + speaker.getMood());
+        System.out.println(arthur.getName() + ": " + arthur.getMood());
+        System.out.println(alex.getName() + ": " + alex.getMood());
     }
 }
