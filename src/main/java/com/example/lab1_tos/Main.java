@@ -1,5 +1,7 @@
 package com.example.lab1_tos;
 
+import java.util.List;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -14,7 +16,7 @@ public class Main {
 
         DomainModel.Building building = new DomainModel.Building(
                 "Здание с помостом",
-                "Второй этаж",
+                DomainModel.Location.CENTER,
                 150
         );
 
@@ -24,7 +26,9 @@ public class Main {
         DomainModel.Person arthur = new DomainModel.Person("Артур");
         DomainModel.Person alex = new DomainModel.Person("Алекс");
 
-        DomainModel.Crowd crowd = new DomainModel.Crowd(building);
+        DomainModel.Crowd crowd = new DomainModel.Crowd(DomainModel.Location.CENTER);
+        crowd.chooseBuilding(List.of(building));
+
         crowd.addPerson(speaker);
         crowd.addPerson(arthur);
         crowd.addPerson(alex);
@@ -34,10 +38,11 @@ public class Main {
         DomainModel.Event event = new DomainModel.Event(speaker, crowd, stage, building);
 
         System.out.println("Событие произошло в " + event.getBuilding().getName());
+        System.out.println("Локация толпы: " + event.getCrowd().getLocation());
         System.out.println("Количество людей в толпе: " + event.getCrowd().getSize());
         System.out.println("Максимальная вместимость: " + event.getCrowd().getMaxCapacity());
 
-        event.startSpeech("inspirational");
+        event.startSpeech(DomainModel.Event.SpeechType.INSPIRATIONAL);
 
         System.out.println(speaker.getName() + ": " + speaker.getMood());
         System.out.println(arthur.getName() + ": " + arthur.getMood());

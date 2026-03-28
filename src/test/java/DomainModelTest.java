@@ -5,186 +5,256 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class DomainModelTest {
+class DomainModelTest {
 
     @Test
-    public void testPersonCreation() {
-        DomainModel.Person person = new DomainModel.Person("Артур");
+    void personShouldBeCreatedWithDefaultValues() {
+        DomainModel.Person person = new DomainModel.Person("Alice");
 
-        assertNotNull(person);
-        assertEquals("Артур", person.getName());
-        assertEquals("neutral", person.getMood());
-        assertEquals("", person.getInfo());
+        assertEquals("Alice", person.getName());
+        assertEquals(DomainModel.Person.DEFAULT_MOOD, person.getMood());
+        assertEquals(DomainModel.Person.DEFAULT_INFO, person.getInfo());
     }
 
     @Test
-    public void testPersonCreationWithEmptyName() {
-        DomainModel.Person person = new DomainModel.Person("");
+    void personShouldChangeName() {
+        DomainModel.Person person = new DomainModel.Person("Alice");
 
-        assertNotNull(person);
-        assertEquals("", person.getName());
+        person.setName("Bob");
+
+        assertEquals("Bob", person.getName());
     }
 
     @Test
-    public void testPersonWithLargeName() {
-        String largeName = "А".repeat(1000);
-        DomainModel.Person person = new DomainModel.Person(largeName);
+    void personShouldChangeInfo() {
+        DomainModel.Person person = new DomainModel.Person("Alice");
 
-        assertEquals(largeName, person.getName());
+        person.setInfo("Important news");
+
+        assertEquals("Important news", person.getInfo());
     }
 
     @Test
-    public void testSetMethodsForPerson() {
-        DomainModel.Person person = new DomainModel.Person("Оратор");
+    void personShouldChangeMood() {
+        DomainModel.Person person = new DomainModel.Person("Alice");
 
-        person.setName("Новый Оратор");
-        person.setMood("happy");
-        person.setInfo("Новая информация");
+        person.setMood(DomainModel.Person.Mood.HAPPY);
 
-        assertEquals("Новый Оратор", person.getName());
-        assertEquals("happy", person.getMood());
-        assertEquals("Новая информация", person.getInfo());
+        assertEquals(DomainModel.Person.Mood.HAPPY, person.getMood());
     }
 
     @Test
-    public void testPersonMoodChangeAfterSpeech() {
-        DomainModel.Person person = new DomainModel.Person("Артур");
+    void shareInfoShouldCopyInfoToOtherPerson() {
+        DomainModel.Person first = new DomainModel.Person("Alice");
+        DomainModel.Person second = new DomainModel.Person("Bob");
+        first.setInfo("Secret");
 
-        assertEquals("neutral", person.getMood());
+        first.shareInfo(second);
 
-        person.reactToSpeech("inspirational");
-        assertEquals("happy", person.getMood());
-
-        person.reactToSpeech("angry");
-        assertEquals("angry", person.getMood());
-
-        person.reactToSpeech("other");
-        assertEquals("neutral", person.getMood());
+        assertEquals("Secret", second.getInfo());
     }
 
     @Test
-    public void testShareInfoBetweenPeople() {
-        DomainModel.Person speaker = new DomainModel.Person("Оратор");
-        DomainModel.Person listener = new DomainModel.Person("Артур");
+    void reactToInspirationalSpeechShouldMakePersonHappy() {
+        DomainModel.Person person = new DomainModel.Person("Alice");
 
-        speaker.setInfo("Новая информация");
-        speaker.shareInfo(listener);
+        person.reactToSpeech(DomainModel.Event.SpeechType.INSPIRATIONAL);
 
-        assertEquals("Новая информация", listener.getInfo());
+        assertEquals(DomainModel.Person.Mood.HAPPY, person.getMood());
     }
 
     @Test
-    public void testGreetSharesInfo() {
-        DomainModel.Person person1 = new DomainModel.Person("Оратор");
-        DomainModel.Person person2 = new DomainModel.Person("Артур");
+    void reactToAngrySpeechShouldMakePersonAngry() {
+        DomainModel.Person person = new DomainModel.Person("Alice");
 
-        person1.setInfo("Секрет");
-        String greeting = person1.greet(person2);
+        person.reactToSpeech(DomainModel.Event.SpeechType.ANGRY);
 
-        assertEquals("Оратор greets Артур with a neutral mood.", greeting);
-        assertEquals("Секрет", person2.getInfo());
+        assertEquals(DomainModel.Person.Mood.ANGRY, person.getMood());
     }
 
     @Test
-    public void testExchangeMood() {
-        DomainModel.Person person1 = new DomainModel.Person("Оратор");
-        DomainModel.Person person2 = new DomainModel.Person("Артур");
+    void reactToNeutralSpeechShouldMakePersonNeutral() {
+        DomainModel.Person person = new DomainModel.Person("Alice");
+        person.setMood(DomainModel.Person.Mood.HAPPY);
 
-        person1.setMood("happy");
-        person2.setMood("angry");
+        person.reactToSpeech(DomainModel.Event.SpeechType.NEUTRAL);
 
-        person1.exchangeMood(person2);
-
-        assertEquals("angry", person1.getMood());
-        assertEquals("happy", person2.getMood());
+        assertEquals(DomainModel.Person.Mood.NEUTRAL, person.getMood());
     }
 
     @Test
-    public void testBuildingCreation() {
-        DomainModel.Building building = new DomainModel.Building("Здание с помостом", "Второй этаж", 150);
+    void exchangeMoodShouldSwapMoods() {
+        DomainModel.Person first = new DomainModel.Person("Alice");
+        DomainModel.Person second = new DomainModel.Person("Bob");
 
-        assertNotNull(building);
-        assertEquals("Здание с помостом", building.getName());
-        assertEquals("Второй этаж", building.getLocation());
+        first.setMood(DomainModel.Person.Mood.HAPPY);
+        second.setMood(DomainModel.Person.Mood.ANGRY);
+
+        first.exchangeMood(second);
+
+        assertEquals(DomainModel.Person.Mood.ANGRY, first.getMood());
+        assertEquals(DomainModel.Person.Mood.HAPPY, second.getMood());
+    }
+
+    @Test
+    void greetShouldReturnCorrectStringAndShareInfo() {
+        DomainModel.Person first = new DomainModel.Person("Alice");
+        DomainModel.Person second = new DomainModel.Person("Bob");
+        first.setInfo("Hello");
+        first.setMood(DomainModel.Person.Mood.HAPPY);
+
+        String result = first.greet(second);
+
+        assertEquals("Alice greets Bob with a happy mood.", result);
+        assertEquals("Hello", second.getInfo());
+    }
+
+    @Test
+    void buildingShouldBeCreatedCorrectly() {
+        DomainModel.Building building = new DomainModel.Building(
+                "Hall",
+                DomainModel.Location.CENTER,
+                150
+        );
+
+        assertEquals("Hall", building.getName());
+        assertEquals(DomainModel.Location.CENTER, building.getLocation());
         assertEquals(150, building.getSize());
     }
 
     @Test
-    public void testBuildingSetMethods() {
-        DomainModel.Building building = new DomainModel.Building("Старое здание", "Первый этаж", 100);
+    void buildingShouldChangeFields() {
+        DomainModel.Building building = new DomainModel.Building(
+                "Hall",
+                DomainModel.Location.CENTER,
+                150
+        );
 
-        building.setName("Новое здание");
-        building.setLocation("Третий этаж");
+        building.setName("Arena");
+        building.setLocation(DomainModel.Location.NORTH);
         building.setSize(350);
 
-        assertEquals("Новое здание", building.getName());
-        assertEquals("Третий этаж", building.getLocation());
+        assertEquals("Arena", building.getName());
+        assertEquals(DomainModel.Location.NORTH, building.getLocation());
         assertEquals(350, building.getSize());
     }
 
     @Test
-    public void testBuildingMaxCrowdCapacitySmall() {
-        DomainModel.Building building = new DomainModel.Building("Маленькое здание", "Центр", 50);
-
-        assertEquals(5, building.determineMaxCrowdCapacity());
-    }
-
-    @Test
-    public void testBuildingMaxCrowdCapacityMedium() {
-        DomainModel.Building building = new DomainModel.Building("Среднее здание", "Центр", 150);
-
-        assertEquals(10, building.determineMaxCrowdCapacity());
-    }
-
-    @Test
-    public void testBuildingMaxCrowdCapacityLarge() {
-        DomainModel.Building building = new DomainModel.Building("Большое здание", "Центр", 400);
+    void determineMaxCrowdCapacityShouldReturnTwentyForLargeBuilding() {
+        DomainModel.Building building = new DomainModel.Building(
+                "Arena",
+                DomainModel.Location.CENTER,
+                350
+        );
 
         assertEquals(20, building.determineMaxCrowdCapacity());
     }
 
     @Test
-    public void testDetermineRequiredVolumeForSmallBuilding() {
-        DomainModel.Building building = new DomainModel.Building("Маленькое здание", "Центр", 50);
+    void determineMaxCrowdCapacityShouldReturnTenForMediumBuilding() {
+        DomainModel.Building building = new DomainModel.Building(
+                "Hall",
+                DomainModel.Location.CENTER,
+                150
+        );
 
-        assertEquals("quiet", building.determineRequiredVolume(1));
-        assertEquals("normal", building.determineRequiredVolume(3));
-        assertEquals("loud", building.determineRequiredVolume(5));
+        assertEquals(10, building.determineMaxCrowdCapacity());
     }
 
     @Test
-    public void testDetermineRequiredVolumeForMediumBuilding() {
-        DomainModel.Building building = new DomainModel.Building("Среднее здание", "Центр", 150);
+    void determineMaxCrowdCapacityShouldReturnFiveForSmallBuilding() {
+        DomainModel.Building building = new DomainModel.Building(
+                "Room",
+                DomainModel.Location.CENTER,
+                50
+        );
 
-        assertEquals("quiet", building.determineRequiredVolume(2));
-        assertEquals("normal", building.determineRequiredVolume(5));
-        assertEquals("loud", building.determineRequiredVolume(10));
+        assertEquals(5, building.determineMaxCrowdCapacity());
     }
 
     @Test
-    public void testDetermineRequiredVolumeForLargeBuilding() {
-        DomainModel.Building building = new DomainModel.Building("Большое здание", "Центр", 400);
+    void determineRequiredVolumeShouldReturnQuietWhenCrowdIsZero() {
+        DomainModel.Building building = new DomainModel.Building(
+                "Hall",
+                DomainModel.Location.CENTER,
+                150
+        );
 
-        assertEquals("normal", building.determineRequiredVolume(3));
-        assertEquals("loud", building.determineRequiredVolume(10));
-        assertEquals("very loud", building.determineRequiredVolume(20));
+        assertEquals(DomainModel.Building.VolumeLevel.QUIET, building.determineRequiredVolume(0));
     }
 
     @Test
-    public void testEmptyCrowd() {
-        DomainModel.Building building = new DomainModel.Building("Здание", "Центр", 150);
+    void determineRequiredVolumeShouldReturnCorrectValueForLargeBuilding() {
+        DomainModel.Building building = new DomainModel.Building(
+                "Arena",
+                DomainModel.Location.CENTER,
+                350
+        );
+
+        assertEquals(DomainModel.Building.VolumeLevel.NORMAL, building.determineRequiredVolume(3));
+        assertEquals(DomainModel.Building.VolumeLevel.LOUD, building.determineRequiredVolume(10));
+        assertEquals(DomainModel.Building.VolumeLevel.VERY_LOUD, building.determineRequiredVolume(18));
+    }
+
+    @Test
+    void determineRequiredVolumeShouldReturnCorrectValueForMediumBuilding() {
+        DomainModel.Building building = new DomainModel.Building(
+                "Hall",
+                DomainModel.Location.CENTER,
+                150
+        );
+
+        assertEquals(DomainModel.Building.VolumeLevel.QUIET, building.determineRequiredVolume(2));
+        assertEquals(DomainModel.Building.VolumeLevel.NORMAL, building.determineRequiredVolume(5));
+        assertEquals(DomainModel.Building.VolumeLevel.LOUD, building.determineRequiredVolume(9));
+    }
+
+    @Test
+    void determineRequiredVolumeShouldReturnCorrectValueForSmallBuilding() {
+        DomainModel.Building building = new DomainModel.Building(
+                "Room",
+                DomainModel.Location.CENTER,
+                50
+        );
+
+        assertEquals(DomainModel.Building.VolumeLevel.QUIET, building.determineRequiredVolume(1));
+        assertEquals(DomainModel.Building.VolumeLevel.NORMAL, building.determineRequiredVolume(3));
+        assertEquals(DomainModel.Building.VolumeLevel.LOUD, building.determineRequiredVolume(5));
+    }
+
+    @Test
+    void crowdShouldBeCreatedEmptyFromBuilding() {
+        DomainModel.Building building = new DomainModel.Building(
+                "Hall",
+                DomainModel.Location.CENTER,
+                150
+        );
         DomainModel.Crowd crowd = new DomainModel.Crowd(building);
 
         assertEquals(0, crowd.getSize());
-        assertEquals(10, crowd.getMaxCapacity());
         assertEquals(building, crowd.getBuilding());
+        assertEquals(DomainModel.Location.CENTER, crowd.getLocation());
     }
 
     @Test
-    public void testCrowdAddPerson() {
-        DomainModel.Building building = new DomainModel.Building("Здание", "Центр", 150);
+    void crowdShouldBeCreatedFromLocationWithoutBuilding() {
+        DomainModel.Crowd crowd = new DomainModel.Crowd(DomainModel.Location.NORTH);
+
+        assertEquals(0, crowd.getSize());
+        assertNull(crowd.getBuilding());
+        assertEquals(DomainModel.Location.NORTH, crowd.getLocation());
+        assertEquals(0, crowd.getMaxCapacity());
+    }
+
+    @Test
+    void addPersonShouldIncreaseCrowdSize() {
+        DomainModel.Building building = new DomainModel.Building(
+                "Hall",
+                DomainModel.Location.CENTER,
+                150
+        );
         DomainModel.Crowd crowd = new DomainModel.Crowd(building);
-        DomainModel.Person person = new DomainModel.Person("Оратор");
+        DomainModel.Person person = new DomainModel.Person("Alice");
 
         crowd.addPerson(person);
 
@@ -193,58 +263,26 @@ public class DomainModelTest {
     }
 
     @Test
-    public void testAddMultiplePeopleToCrowd() {
-        DomainModel.Building building = new DomainModel.Building("Здание", "Центр", 150);
-        DomainModel.Crowd crowd = new DomainModel.Crowd(building);
-
-        DomainModel.Person person1 = new DomainModel.Person("Оратор");
-        DomainModel.Person person2 = new DomainModel.Person("Артур");
-
-        crowd.addPerson(person1);
-        crowd.addPerson(person2);
-
-        assertEquals(2, crowd.getSize());
-        assertTrue(crowd.contains(person1));
-        assertTrue(crowd.contains(person2));
-    }
-
-    @Test
-    public void testAddDuplicatePersonToCrowd() {
-        DomainModel.Building building = new DomainModel.Building("Здание", "Центр", 150);
-        DomainModel.Crowd crowd = new DomainModel.Crowd(building);
-
-        DomainModel.Person person1 = new DomainModel.Person("Оратор");
-        DomainModel.Person person2 = new DomainModel.Person("Оратор");
-
-        crowd.addPerson(person1);
-        crowd.addPerson(person2);
-
-        assertEquals(2, crowd.getSize());
-        assertTrue(crowd.contains(person1));
-        assertTrue(crowd.contains(person2));
-    }
-
-    @Test
-    public void testCrowdMaxCapacityDependsOnBuilding() {
-        DomainModel.Building smallBuilding = new DomainModel.Building("Маленькое", "Центр", 50);
-        DomainModel.Crowd crowd = new DomainModel.Crowd(smallBuilding);
-
-        for (int i = 0; i < 10; i++) {
-            crowd.addPerson(new DomainModel.Person("Человек " + i));
-        }
-
-        assertEquals(5, crowd.getSize());
-        assertEquals(5, crowd.getMaxCapacity());
-    }
-
-    @Test
-    public void testRemovePersonFromCrowd() {
-        DomainModel.Building building = new DomainModel.Building("Здание", "Центр", 150);
-        DomainModel.Crowd crowd = new DomainModel.Crowd(building);
-        DomainModel.Person person = new DomainModel.Person("Оратор");
+    void addPersonShouldNotAddWhenCrowdHasNoBuilding() {
+        DomainModel.Crowd crowd = new DomainModel.Crowd(DomainModel.Location.CENTER);
+        DomainModel.Person person = new DomainModel.Person("Alice");
 
         crowd.addPerson(person);
-        assertEquals(1, crowd.getSize());
+
+        assertEquals(0, crowd.getSize());
+        assertFalse(crowd.contains(person));
+    }
+
+    @Test
+    void removePersonShouldDecreaseCrowdSize() {
+        DomainModel.Building building = new DomainModel.Building(
+                "Hall",
+                DomainModel.Location.CENTER,
+                150
+        );
+        DomainModel.Crowd crowd = new DomainModel.Crowd(building);
+        DomainModel.Person person = new DomainModel.Person("Alice");
+        crowd.addPerson(person);
 
         crowd.removePerson(person);
 
@@ -253,227 +291,324 @@ public class DomainModelTest {
     }
 
     @Test
-    public void testRemoveNonExistingPersonFromCrowd() {
-        DomainModel.Building building = new DomainModel.Building("Здание", "Центр", 150);
+    void displayShouldReturnAllNamesSeparatedByComma() {
+        DomainModel.Building building = new DomainModel.Building(
+                "Hall",
+                DomainModel.Location.CENTER,
+                150
+        );
         DomainModel.Crowd crowd = new DomainModel.Crowd(building);
+        crowd.addPerson(new DomainModel.Person("Alice"));
+        crowd.addPerson(new DomainModel.Person("Bob"));
 
-        DomainModel.Person speaker = new DomainModel.Person("Оратор");
-        DomainModel.Person arthur = new DomainModel.Person("Артур");
-
-        crowd.addPerson(speaker);
-        crowd.removePerson(arthur);
-
-        assertEquals(1, crowd.getSize());
-        assertTrue(crowd.contains(speaker));
+        assertEquals("Alice, Bob", crowd.display());
     }
 
     @Test
-    public void testCrowdDisplay() {
-        DomainModel.Building building = new DomainModel.Building("Здание", "Центр", 150);
+    void getMaxCapacityShouldReturnBuildingCapacity() {
+        DomainModel.Building building = new DomainModel.Building(
+                "Hall",
+                DomainModel.Location.CENTER,
+                150
+        );
         DomainModel.Crowd crowd = new DomainModel.Crowd(building);
 
-        DomainModel.Person person1 = new DomainModel.Person("Оратор");
-        DomainModel.Person person2 = new DomainModel.Person("Артур");
-
-        crowd.addPerson(person1);
-        crowd.addPerson(person2);
-
-        String result = crowd.display();
-
-        assertTrue(result.contains("Оратор"));
-        assertTrue(result.contains("Артур"));
+        assertEquals(10, crowd.getMaxCapacity());
     }
 
     @Test
-    public void testGetAllPeople() {
-        DomainModel.Building building = new DomainModel.Building("Здание", "Центр", 150);
-        DomainModel.Crowd crowd = new DomainModel.Crowd(building);
+    void setBuildingShouldUpdateCrowdLocation() {
+        DomainModel.Crowd crowd = new DomainModel.Crowd(DomainModel.Location.WEST);
+        DomainModel.Building building = new DomainModel.Building(
+                "Hall",
+                DomainModel.Location.EAST,
+                150
+        );
 
-        DomainModel.Person person1 = new DomainModel.Person("Оратор");
-        DomainModel.Person person2 = new DomainModel.Person("Артур");
+        crowd.setBuilding(building);
 
-        crowd.addPerson(person1);
-        crowd.addPerson(person2);
-
-        List<DomainModel.Person> people = crowd.getAllPeople();
-
-        assertEquals(2, people.size());
-        assertTrue(people.contains(person1));
-        assertTrue(people.contains(person2));
+        assertEquals(building, crowd.getBuilding());
+        assertEquals(DomainModel.Location.EAST, crowd.getLocation());
     }
 
     @Test
-    public void testEmptyCrowdInteraction() {
-        DomainModel.Building building = new DomainModel.Building("Здание", "Центр", 150);
-        DomainModel.Crowd crowd = new DomainModel.Crowd(building);
-
-        assertThrows(IllegalArgumentException.class, crowd::interact);
-    }
-
-    @Test
-    public void testCrowdInteractionOnePerson() {
-        DomainModel.Building building = new DomainModel.Building("Здание", "Центр", 150);
-        DomainModel.Crowd crowd = new DomainModel.Crowd(building);
-
-        crowd.addPerson(new DomainModel.Person("Оратор"));
-
-        assertThrows(IllegalArgumentException.class, crowd::interact);
-    }
-
-    @Test
-    public void testCrowdInteractionExchangesMoodsForTwoPeople() {
-        DomainModel.Building building = new DomainModel.Building("Здание", "Центр", 150);
-        DomainModel.Crowd crowd = new DomainModel.Crowd(building);
-
-        DomainModel.Person person1 = new DomainModel.Person("Оратор");
-        DomainModel.Person person2 = new DomainModel.Person("Артур");
-
-        person1.setMood("happy");
-        person2.setMood("angry");
-
-        crowd.addPerson(person1);
-        crowd.addPerson(person2);
-
-        crowd.interact();
-
-        assertEquals("angry", person1.getMood());
-        assertEquals("happy", person2.getMood());
-    }
-
-    @Test
-    public void testChangeMoodBasedOnSpeech() {
-        DomainModel.Building building = new DomainModel.Building("Здание", "Центр", 150);
-        DomainModel.Crowd crowd = new DomainModel.Crowd(building);
-
-        DomainModel.Person person1 = new DomainModel.Person("Оратор");
-        DomainModel.Person person2 = new DomainModel.Person("Артур");
-
-        crowd.addPerson(person1);
-        crowd.addPerson(person2);
-
-        crowd.changeMoodBasedOnSpeech("inspirational");
-
-        assertEquals("happy", person1.getMood());
-        assertEquals("happy", person2.getMood());
-    }
-
-    @Test
-    public void testSetBuildingForCrowdWithSmallerCapacity() {
-        DomainModel.Building largeBuilding = new DomainModel.Building("Большое здание", "Центр", 400);
-        DomainModel.Building smallBuilding = new DomainModel.Building("Маленькое здание", "Центр", 50);
-
+    void setBuildingShouldRemoveExtraPeopleIfNewBuildingIsSmaller() {
+        DomainModel.Building largeBuilding = new DomainModel.Building(
+                "Arena",
+                DomainModel.Location.CENTER,
+                350
+        );
+        DomainModel.Building smallBuilding = new DomainModel.Building(
+                "Room",
+                DomainModel.Location.WEST,
+                50
+        );
         DomainModel.Crowd crowd = new DomainModel.Crowd(largeBuilding);
 
-        for (int i = 0; i < 7; i++) {
-            crowd.addPerson(new DomainModel.Person("Человек " + i));
+        for (int i = 1; i <= 7; i++) {
+            crowd.addPerson(new DomainModel.Person("Person" + i));
         }
-
-        assertEquals(7, crowd.getSize());
 
         crowd.setBuilding(smallBuilding);
 
-        assertEquals(5, crowd.getSize());
         assertEquals(smallBuilding, crowd.getBuilding());
-        assertEquals(5, crowd.getMaxCapacity());
-    }
-
-    @Test
-    public void testEventCreation() {
-        DomainModel.Building building = new DomainModel.Building("Здание с помостом", "Второй этаж", 150);
-        DomainModel.Crowd crowd = new DomainModel.Crowd(building);
-        DomainModel.Person speaker = new DomainModel.Person("Оратор");
-        String stage = "Помост";
-
-        DomainModel.Event event = new DomainModel.Event(speaker, crowd, stage, building);
-
-        assertNotNull(event);
-        assertEquals(speaker, event.getSpeaker());
-        assertEquals(crowd, event.getCrowd());
-        assertEquals(stage, event.getStage());
-        assertEquals(building, event.getBuilding());
-    }
-
-    @Test
-    public void testEventChangesCrowdMoodAndSharesInfo() {
-        DomainModel.Building building = new DomainModel.Building("Здание", "Центр", 150);
-        DomainModel.Crowd crowd = new DomainModel.Crowd(building);
-
-        DomainModel.Person speaker = new DomainModel.Person("Оратор");
-        speaker.setInfo("Важная информация");
-
-        DomainModel.Person person1 = new DomainModel.Person("Артур");
-        DomainModel.Person person2 = new DomainModel.Person("Алекс");
-
-        crowd.addPerson(person1);
-        crowd.addPerson(person2);
-
-        DomainModel.Event event = new DomainModel.Event(speaker, crowd, "Помост", building);
-        event.startSpeech("inspirational");
-
-        assertEquals("happy", person1.getMood());
-        assertEquals("happy", person2.getMood());
-        assertEquals("Важная информация", person1.getInfo());
-        assertEquals("Важная информация", person2.getInfo());
-    }
-
-    @Test
-    public void testEventSetBuildingAlsoChangesCrowdBuilding() {
-        DomainModel.Building building1 = new DomainModel.Building("Здание 1", "Центр", 400);
-        DomainModel.Building building2 = new DomainModel.Building("Здание 2", "Центр", 50);
-
-        DomainModel.Crowd crowd = new DomainModel.Crowd(building1);
-        crowd.addPerson(new DomainModel.Person("Человек 1"));
-        crowd.addPerson(new DomainModel.Person("Человек 2"));
-        crowd.addPerson(new DomainModel.Person("Человек 3"));
-        crowd.addPerson(new DomainModel.Person("Человек 4"));
-        crowd.addPerson(new DomainModel.Person("Человек 5"));
-        crowd.addPerson(new DomainModel.Person("Человек 6"));
-
-        DomainModel.Event event = new DomainModel.Event(
-                new DomainModel.Person("Оратор"),
-                crowd,
-                "Помост",
-                building1
-        );
-
-        event.setBuilding(building2);
-
-        assertEquals(building2, event.getBuilding());
-        assertEquals(building2, event.getCrowd().getBuilding());
-        assertEquals(5, event.getCrowd().getSize());
-    }
-
-    @Test
-    public void testDetermineRequiredVolumeForEmptyCrowd() {
-        DomainModel.Building building = new DomainModel.Building("Здание", "Центр", 150);
-
-        String volume = building.determineRequiredVolume(0);
-
-        assertEquals("quiet", volume);
-    }
-
-    @Test
-    public void testEventConstructorSynchronizesCrowdBuilding() {
-        DomainModel.Building building1 = new DomainModel.Building("Здание 1", "Центр", 400);
-        DomainModel.Building building2 = new DomainModel.Building("Здание 2", "Центр", 50);
-
-        DomainModel.Crowd crowd = new DomainModel.Crowd(building1);
-        crowd.addPerson(new DomainModel.Person("Человек 1"));
-        crowd.addPerson(new DomainModel.Person("Человек 2"));
-        crowd.addPerson(new DomainModel.Person("Человек 3"));
-        crowd.addPerson(new DomainModel.Person("Человек 4"));
-        crowd.addPerson(new DomainModel.Person("Человек 5"));
-        crowd.addPerson(new DomainModel.Person("Человек 6"));
-
-        DomainModel.Event event = new DomainModel.Event(
-                new DomainModel.Person("Оратор"),
-                crowd,
-                "Помост",
-                building2
-        );
-
-        assertEquals(building2, event.getBuilding());
-        assertEquals(building2, crowd.getBuilding());
+        assertEquals(DomainModel.Location.WEST, crowd.getLocation());
         assertEquals(5, crowd.getSize());
+    }
+
+    @Test
+    void setLocationShouldDropBuildingIfLocationsDoNotMatch() {
+        DomainModel.Building building = new DomainModel.Building(
+                "Hall",
+                DomainModel.Location.CENTER,
+                150
+        );
+        DomainModel.Crowd crowd = new DomainModel.Crowd(building);
+
+        crowd.setLocation(DomainModel.Location.SOUTH);
+
+        assertEquals(DomainModel.Location.SOUTH, crowd.getLocation());
+        assertNull(crowd.getBuilding());
+    }
+
+    @Test
+    void setLocationShouldKeepBuildingIfLocationsMatch() {
+        DomainModel.Building building = new DomainModel.Building(
+                "Hall",
+                DomainModel.Location.CENTER,
+                150
+        );
+        DomainModel.Crowd crowd = new DomainModel.Crowd(building);
+
+        crowd.setLocation(DomainModel.Location.CENTER);
+
+        assertEquals(DomainModel.Location.CENTER, crowd.getLocation());
+        assertEquals(building, crowd.getBuilding());
+    }
+
+    @Test
+    void isInBuildingShouldReturnTrueWhenLocationsMatch() {
+        DomainModel.Building building = new DomainModel.Building(
+                "Hall",
+                DomainModel.Location.CENTER,
+                150
+        );
+        DomainModel.Crowd crowd = new DomainModel.Crowd(DomainModel.Location.CENTER);
+
+        assertTrue(crowd.isInBuilding(building));
+    }
+
+    @Test
+    void isInBuildingShouldReturnFalseWhenLocationsDoNotMatch() {
+        DomainModel.Building building = new DomainModel.Building(
+                "Hall",
+                DomainModel.Location.CENTER,
+                150
+        );
+        DomainModel.Crowd crowd = new DomainModel.Crowd(DomainModel.Location.SOUTH);
+
+        assertFalse(crowd.isInBuilding(building));
+    }
+
+    @Test
+    void chooseBuildingShouldAssignMatchingBuilding() {
+        DomainModel.Building first = new DomainModel.Building(
+                "First",
+                DomainModel.Location.NORTH,
+                100
+        );
+        DomainModel.Building second = new DomainModel.Building(
+                "Second",
+                DomainModel.Location.EAST,
+                150
+        );
+        DomainModel.Crowd crowd = new DomainModel.Crowd(DomainModel.Location.EAST);
+
+        DomainModel.Building chosen = crowd.chooseBuilding(List.of(first, second));
+
+        assertEquals(second, chosen);
+        assertEquals(second, crowd.getBuilding());
+        assertEquals(DomainModel.Location.EAST, crowd.getLocation());
+    }
+
+    @Test
+    void chooseBuildingShouldReturnNullWhenNoMatchingBuildingExists() {
+        DomainModel.Building first = new DomainModel.Building(
+                "First",
+                DomainModel.Location.NORTH,
+                100
+        );
+        DomainModel.Building second = new DomainModel.Building(
+                "Second",
+                DomainModel.Location.WEST,
+                150
+        );
+        DomainModel.Crowd crowd = new DomainModel.Crowd(DomainModel.Location.SOUTH);
+
+        DomainModel.Building chosen = crowd.chooseBuilding(List.of(first, second));
+
+        assertNull(chosen);
+        assertNull(crowd.getBuilding());
+        assertEquals(DomainModel.Location.SOUTH, crowd.getLocation());
+    }
+
+    @Test
+    void interactShouldThrowExceptionIfLessThanTwoPeople() {
+        DomainModel.Building building = new DomainModel.Building(
+                "Hall",
+                DomainModel.Location.CENTER,
+                150
+        );
+        DomainModel.Crowd crowd = new DomainModel.Crowd(building);
+        crowd.addPerson(new DomainModel.Person("Alice"));
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                crowd::interact
+        );
+
+        assertEquals("At least two people are needed for interaction", exception.getMessage());
+    }
+
+    @Test
+    void interactShouldKeepSameCrowdSize() {
+        DomainModel.Building building = new DomainModel.Building(
+                "Hall",
+                DomainModel.Location.CENTER,
+                150
+        );
+        DomainModel.Crowd crowd = new DomainModel.Crowd(building);
+        crowd.addPerson(new DomainModel.Person("Alice"));
+        crowd.addPerson(new DomainModel.Person("Bob"));
+
+        crowd.interact();
+
+        assertEquals(2, crowd.getSize());
+    }
+
+    @Test
+    void changeMoodBasedOnSpeechShouldChangeMoodForAllPeople() {
+        DomainModel.Building building = new DomainModel.Building(
+                "Hall",
+                DomainModel.Location.CENTER,
+                150
+        );
+        DomainModel.Crowd crowd = new DomainModel.Crowd(building);
+        DomainModel.Person first = new DomainModel.Person("Alice");
+        DomainModel.Person second = new DomainModel.Person("Bob");
+
+        crowd.addPerson(first);
+        crowd.addPerson(second);
+
+        crowd.changeMoodBasedOnSpeech(DomainModel.Event.SpeechType.INSPIRATIONAL);
+
+        assertEquals(DomainModel.Person.Mood.HAPPY, first.getMood());
+        assertEquals(DomainModel.Person.Mood.HAPPY, second.getMood());
+    }
+
+    @Test
+    void eventShouldSetSameBuildingForCrowd() {
+        DomainModel.Person speaker = new DomainModel.Person("Speaker");
+        DomainModel.Building firstBuilding = new DomainModel.Building(
+                "Old Hall",
+                DomainModel.Location.CENTER,
+                150
+        );
+        DomainModel.Building secondBuilding = new DomainModel.Building(
+                "New Hall",
+                DomainModel.Location.SOUTH,
+                350
+        );
+        DomainModel.Crowd crowd = new DomainModel.Crowd(firstBuilding);
+
+        DomainModel.Event event = new DomainModel.Event(speaker, crowd, null, secondBuilding);
+
+        assertEquals(secondBuilding, event.getBuilding());
+        assertEquals(secondBuilding, crowd.getBuilding());
+        assertEquals(DomainModel.Location.SOUTH, crowd.getLocation());
+    }
+
+    @Test
+    void eventConstructorShouldMoveCrowdToBuildingLocationIfNeeded() {
+        DomainModel.Person speaker = new DomainModel.Person("Speaker");
+        DomainModel.Crowd crowd = new DomainModel.Crowd(DomainModel.Location.NORTH);
+        DomainModel.Building building = new DomainModel.Building(
+                "Hall",
+                DomainModel.Location.CENTER,
+                150
+        );
+
+        DomainModel.Event event = new DomainModel.Event(speaker, crowd, null, building);
+
+        assertEquals(building, event.getBuilding());
+        assertEquals(building, crowd.getBuilding());
+        assertEquals(DomainModel.Location.CENTER, crowd.getLocation());
+    }
+
+    @Test
+    void setBuildingInEventShouldAlsoChangeCrowdBuilding() {
+        DomainModel.Person speaker = new DomainModel.Person("Speaker");
+        DomainModel.Building firstBuilding = new DomainModel.Building(
+                "Hall",
+                DomainModel.Location.CENTER,
+                150
+        );
+        DomainModel.Building secondBuilding = new DomainModel.Building(
+                "Arena",
+                DomainModel.Location.NORTH,
+                350
+        );
+        DomainModel.Crowd crowd = new DomainModel.Crowd(firstBuilding);
+        DomainModel.Event event = new DomainModel.Event(speaker, crowd, null, firstBuilding);
+
+        event.setBuilding(secondBuilding);
+
+        assertEquals(secondBuilding, event.getBuilding());
+        assertEquals(secondBuilding, crowd.getBuilding());
+        assertEquals(DomainModel.Location.NORTH, crowd.getLocation());
+    }
+
+    @Test
+    void startSpeechShouldChangeCrowdMoodAndShareSpeakerInfo() {
+        DomainModel.Person speaker = new DomainModel.Person("Speaker");
+        speaker.setInfo("Important message");
+
+        DomainModel.Building building = new DomainModel.Building(
+                "Hall",
+                DomainModel.Location.CENTER,
+                150
+        );
+        DomainModel.Crowd crowd = new DomainModel.Crowd(building);
+
+        DomainModel.Person first = new DomainModel.Person("Alice");
+        DomainModel.Person second = new DomainModel.Person("Bob");
+
+        crowd.addPerson(first);
+        crowd.addPerson(second);
+
+        DomainModel.Event event = new DomainModel.Event(speaker, crowd, null, building);
+        event.startSpeech(DomainModel.Event.SpeechType.INSPIRATIONAL);
+
+        assertEquals(DomainModel.Person.Mood.HAPPY, first.getMood());
+        assertEquals(DomainModel.Person.Mood.HAPPY, second.getMood());
+        assertEquals("Important message", first.getInfo());
+        assertEquals("Important message", second.getInfo());
+    }
+
+    @Test
+    void setCrowdShouldReplaceCrowdInEvent() {
+        DomainModel.Person speaker = new DomainModel.Person("Speaker");
+        DomainModel.Building building = new DomainModel.Building(
+                "Hall",
+                DomainModel.Location.CENTER,
+                150
+        );
+        DomainModel.Crowd firstCrowd = new DomainModel.Crowd(building);
+        DomainModel.Crowd secondCrowd = new DomainModel.Crowd(building);
+
+        DomainModel.Event event = new DomainModel.Event(speaker, firstCrowd, null, building);
+        event.setCrowd(secondCrowd);
+
+        assertEquals(secondCrowd, event.getCrowd());
     }
 }

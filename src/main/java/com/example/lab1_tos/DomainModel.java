@@ -6,15 +6,36 @@ import java.util.Random;
 
 public class DomainModel {
 
+    public enum Location {
+        NORTH,
+        SOUTH,
+        WEST,
+        EAST,
+        CENTER,
+        NORTH_WEST,
+        NORTH_EAST,
+        SOUTH_WEST,
+        SOUTH_EAST
+    }
+
     public static class Person {
+        public static final Mood DEFAULT_MOOD = Mood.NEUTRAL;
+        public static final String DEFAULT_INFO = "";
+
+        public enum Mood {
+            NEUTRAL,
+            HAPPY,
+            ANGRY
+        }
+
         private String name;
-        private String mood;
+        private Mood mood;
         private String info;
 
         public Person(String name) {
             this.name = name;
-            this.mood = "neutral";
-            this.info = "";
+            this.mood = DEFAULT_MOOD;
+            this.info = DEFAULT_INFO;
         }
 
         public String getInfo() {
@@ -33,11 +54,11 @@ public class DomainModel {
             this.name = name;
         }
 
-        public String getMood() {
+        public Mood getMood() {
             return mood;
         }
 
-        public void setMood(String mood) {
+        public void setMood(Mood mood) {
             this.mood = mood;
         }
 
@@ -46,18 +67,22 @@ public class DomainModel {
             System.out.println(this.name + " shares information with " + other.getName() + ": " + this.info);
         }
 
-        public void reactToSpeech(String speechType) {
-            if ("inspirational".equals(speechType)) {
-                this.mood = "happy";
-            } else if ("angry".equals(speechType)) {
-                this.mood = "angry";
-            } else {
-                this.mood = "neutral";
+        public void reactToSpeech(Event.SpeechType speechType) {
+            switch (speechType) {
+                case INSPIRATIONAL:
+                    this.mood = Mood.HAPPY;
+                    break;
+                case ANGRY:
+                    this.mood = Mood.ANGRY;
+                    break;
+                default:
+                    this.mood = Mood.NEUTRAL;
+                    break;
             }
         }
 
         public void exchangeMood(Person other) {
-            String tempMood = this.mood;
+            Mood tempMood = this.mood;
             this.mood = other.mood;
             other.mood = tempMood;
 
@@ -66,16 +91,23 @@ public class DomainModel {
 
         public String greet(Person other) {
             this.shareInfo(other);
-            return this.name + " greets " + other.getName() + " with a " + this.mood + " mood.";
+            return this.name + " greets " + other.getName() + " with a " + this.mood.name().toLowerCase() + " mood.";
         }
     }
 
     public static class Building {
+        public enum VolumeLevel {
+            QUIET,
+            NORMAL,
+            LOUD,
+            VERY_LOUD
+        }
+
         private String name;
-        private String location;
+        private Location location;
         private int size;
 
-        public Building(String name, String location, int size) {
+        public Building(String name, Location location, int size) {
             this.name = name;
             this.location = location;
             this.size = size;
@@ -89,11 +121,11 @@ public class DomainModel {
             this.name = name;
         }
 
-        public String getLocation() {
+        public Location getLocation() {
             return location;
         }
 
-        public void setLocation(String location) {
+        public void setLocation(Location location) {
             this.location = location;
         }
 
@@ -115,38 +147,38 @@ public class DomainModel {
             }
         }
 
-        public String determineRequiredVolume(int crowdSize) {
+        public VolumeLevel determineRequiredVolume(int crowdSize) {
             int maxCapacity = determineMaxCrowdCapacity();
 
             if (crowdSize == 0) {
-                return "quiet";
+                return VolumeLevel.QUIET;
             }
 
             double crowdDensity = (double) crowdSize / maxCapacity;
 
             if (size > 300) {
                 if (crowdDensity <= 0.3) {
-                    return "normal";
+                    return VolumeLevel.NORMAL;
                 } else if (crowdDensity <= 0.7) {
-                    return "loud";
+                    return VolumeLevel.LOUD;
                 } else {
-                    return "very loud";
+                    return VolumeLevel.VERY_LOUD;
                 }
             } else if (size >= 100) {
                 if (crowdDensity <= 0.3) {
-                    return "quiet";
+                    return VolumeLevel.QUIET;
                 } else if (crowdDensity <= 0.7) {
-                    return "normal";
+                    return VolumeLevel.NORMAL;
                 } else {
-                    return "loud";
+                    return VolumeLevel.LOUD;
                 }
             } else {
                 if (crowdDensity <= 0.3) {
-                    return "quiet";
+                    return VolumeLevel.QUIET;
                 } else if (crowdDensity <= 0.7) {
-                    return "normal";
+                    return VolumeLevel.NORMAL;
                 } else {
-                    return "loud";
+                    return VolumeLevel.LOUD;
                 }
             }
         }
@@ -155,15 +187,29 @@ public class DomainModel {
     public static class Crowd {
         private List<Person> people;
         private Building building;
+        private Location location;
         private Random random;
 
         public Crowd(Building building) {
             this.people = new ArrayList<>();
             this.building = building;
+            this.location = building.getLocation();
+            this.random = new Random();
+        }
+
+        public Crowd(Location location) {
+            this.people = new ArrayList<>();
+            this.building = null;
+            this.location = location;
             this.random = new Random();
         }
 
         public void addPerson(Person person) {
+            if (building == null) {
+                System.out.println("Crowd is not assigned to any building.");
+                return;
+            }
+
             if (people.size() < building.determineMaxCrowdCapacity()) {
                 people.add(person);
             } else {
@@ -202,6 +248,9 @@ public class DomainModel {
         }
 
         public int getMaxCapacity() {
+            if (building == null) {
+                return 0;
+            }
             return building.determineMaxCrowdCapacity();
         }
 
@@ -209,8 +258,21 @@ public class DomainModel {
             return building;
         }
 
+        public Location getLocation() {
+            return location;
+        }
+
+        public void setLocation(Location location) {
+            this.location = location;
+
+            if (building != null && building.getLocation() != location) {
+                building = null;
+            }
+        }
+
         public void setBuilding(Building building) {
             this.building = building;
+            this.location = building.getLocation();
 
             while (people.size() > building.determineMaxCrowdCapacity()) {
                 Person removedPerson = people.remove(people.size() - 1);
@@ -219,6 +281,22 @@ public class DomainModel {
                                 " was removed because the new building capacity is smaller."
                 );
             }
+        }
+
+        public boolean isInBuilding(Building building) {
+            return this.location == building.getLocation();
+        }
+
+        public Building chooseBuilding(List<Building> availableBuildings) {
+            for (Building candidate : availableBuildings) {
+                if (candidate.getLocation() == this.location) {
+                    this.setBuilding(candidate);
+                    return candidate;
+                }
+            }
+
+            this.building = null;
+            return null;
         }
 
         public void interact() {
@@ -240,7 +318,7 @@ public class DomainModel {
             firstPerson.exchangeMood(secondPerson);
         }
 
-        public void changeMoodBasedOnSpeech(String speechType) {
+        public void changeMoodBasedOnSpeech(Event.SpeechType speechType) {
             for (Person person : people) {
                 person.reactToSpeech(speechType);
             }
@@ -248,29 +326,35 @@ public class DomainModel {
     }
 
     public static class Event {
+        public enum SpeechType {
+            INSPIRATIONAL,
+            ANGRY,
+            NEUTRAL
+        }
+
         private Person speaker;
         private Crowd crowd;
-        private Object stage;
         private Building building;
 
         public Event(Person speaker, Crowd crowd, Object stage, Building building) {
             this.speaker = speaker;
             this.crowd = crowd;
-            this.stage = stage;
             this.building = building;
 
-            if (crowd.getBuilding() != building) {
-                crowd.setBuilding(building);
+            if (!crowd.isInBuilding(building)) {
+                crowd.setLocation(building.getLocation());
             }
+
+            crowd.setBuilding(building);
         }
 
-        public void startSpeech(String speechType) {
-            String volume = calculateSpeechVolume();
+        public void startSpeech(SpeechType speechType) {
+            Building.VolumeLevel volume = calculateSpeechVolume();
 
             System.out.println(
-                    speaker.getName() + " starts an " + speechType +
+                    speaker.getName() + " starts an " + speechType.name().toLowerCase() +
                             " speech in " + building.getName() +
-                            " with a " + volume + " voice."
+                            " with a " + volume.name().toLowerCase().replace('_', ' ') + " voice."
             );
 
             crowd.changeMoodBasedOnSpeech(speechType);
@@ -280,7 +364,7 @@ public class DomainModel {
             }
         }
 
-        private String calculateSpeechVolume() {
+        private Building.VolumeLevel calculateSpeechVolume() {
             return building.determineRequiredVolume(crowd.getSize());
         }
 
@@ -294,10 +378,6 @@ public class DomainModel {
 
         public void setCrowd(Crowd crowd) {
             this.crowd = crowd;
-        }
-
-        public Object getStage() {
-            return stage;
         }
 
         public Building getBuilding() {
